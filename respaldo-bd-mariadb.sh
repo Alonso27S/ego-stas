@@ -1,35 +1,30 @@
 #!/bin/bash
-# Este script de ejemplo realiza un respaldo de una base de datos de mariadb-server
-# el respaldo se almacena en el directorio especificado en la variable backup_dir.
-
 # Creado por Juan Reynoso Elias 18-06-2025
 # Última modificación: 18-06-2025
-# Live Love Hack
 
-# Usuario de la base de datos
+# Configuración
 db_user="AlonsoW"
-
-# Contraseña del usuario
 db_password="AlonsoWendy"
-
-# Nombre de la base de datos que deseas respaldar
 db_name="egoistas"
+backup_dir="$HOME/backup-documentos"
 
-# Directorio donde guardarás el respaldo
-backup_dir="$HOME/backup-documentos/"
+# Crear directorio si no existe
+mkdir -p "$backup_dir"
 
-# Fecha y hora en el formato deseado
-backup_date=$(date +"%Y-%m-%d-%H:%M:%S")
+# Fecha con formato seguro para nombres de archivo
+backup_date=$(date +"%Y-%m-%d-%H-%M-%S")
 
-# Nombre del archivo de respaldo
-backup_file="$backup_dir/$db_name-$backup_date.sql"
+# Nombre del archivo de respaldo (usando guiones normales)
+backup_file="$backup_dir/${db_name}-${backup_date}.sql"
 
-# Comando para hacer el respaldo
-mysqldump -u$db_user -p$db_password $db_name > $backup_file
-
-# Verificar si el respaldo fue exitoso
-if [ $? -eq 0 ]; then
-  echo "Respaldo de la base de datos $db_name completado exitosamente."
+# Realizar el respaldo
+if mysqldump -u"$db_user" -p"$db_password" "$db_name" > "$backup_file"; then
+    # Generar checksum (en el mismo directorio de backups)
+    md5sum "$backup_file" > "$backup_file.md5"
+    echo "Respaldo de $db_name completado: $backup_file"
 else
-  echo "Error al hacer el respaldo de la base de datos $db_name."
+    echo "Error al hacer el respaldo de $db_name"
+    exit 1
 fi
+
+
